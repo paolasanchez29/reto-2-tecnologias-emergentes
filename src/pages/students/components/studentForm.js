@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
   Typography,
@@ -11,15 +12,63 @@ import {
   RadioGroup,
   FormControlLabel,
   FormLabel,
-  Radio
+  Radio,
+  InputLabel
 } from '@mui/material';
 import MainCard from 'components/MainCard';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const StudentForm = ({ student, isEdit }) => {
-  if (!student && isEdit) {
-    return <LinearProgress />;
-  }
+  const [name, setName] = useState(student?.name || '');
+  const [lastName, setLastName] = useState(student?.lastName || '');
+  const [email, setEmail] = useState(student?.email || '');
+  const [phone, setPhone] = useState(student?.phone || '');
+  const [address, setAddress] = useState(student?.address || '');
+  const [age, setAge] = useState(student?.age || '');
+  const [gender, setGender] = useState(student?.gender || '');
+  const [typeDocument, setTypeDocument] = useState(student?.typeDocument || '');
+  const [numberDocument, setNumberDocument] = useState(student?.numberDocument || '');
+  const [dateBirth, setDateBirth] = useState(student?.dateBirth || '');
+  const [typeSubject, setTypeSubject] = useState(student?.typeSubject || '');
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    // send data
+    const body = {
+      name,
+      lastName,
+      email,
+      phone,
+      address,
+      age,
+      gender,
+      typeDocument,
+      numberDocument,
+      dateBirth,
+      typeSubject
+    };
+
+    const URL = isEdit ? `http://localhost:9000/api/students/${student._id}` : 'http://localhost:9000/api/students';
+
+    try {
+      const response = await fetch(URL, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const result = await response.json();
+      console.log('Success:', result);
+
+      // Redireccionar al usuario a la ruta "/students"
+      navigate('/students');
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
 
   return (
     <Stack spacing={3} px={20}>
@@ -32,14 +81,19 @@ const StudentForm = ({ student, isEdit }) => {
           </Grid>
           <Grid item xs={6} sm={4} md={6} lg={8}>
             <Stack spacing={2}>
-              <TextField id="outlined-basic" label="Name" variant="outlined" defaultValue={student.name} />
-              <TextField id="outlined-basic" label="Last Name" variant="outlined" defaultValue={student.lastName} />
-              <TextField id="outlined-basic" label="Email" variant="outlined" defaultValue={student.email} />
-              <TextField id="outlined-basic" label="Phone" variant="outlined" defaultValue={student.phone} />
-              <TextField id="outlined-basic" label="Address" variant="outlined" defaultValue={student.address} />
-              <TextField id="outlined-basic" label="Age" variant="outlined" defaultValue={student.age} />
+              <TextField label="Name" variant="outlined" defaultValue={student.name} onChange={(e) => setName(e.target.value)} />
+              <TextField
+                label="Last Name"
+                variant="outlined"
+                defaultValue={student.lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+              <TextField label="Email" variant="outlined" defaultValue={student.email} onChange={(e) => setEmail(e.target.value)} />
+              <TextField label="Phone" variant="outlined" defaultValue={student.phone} onChange={(e) => setPhone(e.target.value)} />
+              <TextField label="Address" variant="outlined" defaultValue={student.address} onChange={(e) => setAddress(e.target.value)} />
+              <TextField label="Age" variant="outlined" defaultValue={student.age} onChange={(e) => setAge(e.target.value)} />
               <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
-              <RadioGroup defaultValue={student.gender} row>
+              <RadioGroup defaultValue={student.gender} row onChange={(e) => setGender(e.target.value)}>
                 <FormControlLabel value="female" control={<Radio />} label="Female" />
                 <FormControlLabel value="male" control={<Radio />} label="Male" />
                 <FormControlLabel value="other" control={<Radio />} label="Other" />
@@ -58,13 +112,28 @@ const StudentForm = ({ student, isEdit }) => {
           </Grid>
           <Grid item xs={6} sm={4} md={6} lg={8}>
             <Stack spacing={2}>
-              <Select labelId="demo-simple-select-label" defaultValue={student.typeDocument} id="demo-simple-select" label="Type Document">
+              <FormLabel id="demo-simple-select-label">Type Document</FormLabel>
+              <Select defaultValue={student.typeDocument} label="Type Document" onChange={(e) => setTypeDocument(e.target.value)}>
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
                 <MenuItem value="passport">Passport</MenuItem>
                 <MenuItem value="identification_card">Identification Card</MenuItem>
               </Select>
-              <TextField id="outlined-basic" label="Number document" variant="outlined" defaultValue={student.numberDocument} />
+              <TextField
+                label="Number document"
+                variant="outlined"
+                defaultValue={student.numberDocument}
+                onChange={(e) => setNumberDocument(e.target.value)}
+              />
               <FormLabel id="demo-simple-select-label">Date of birth</FormLabel>
-              <TextField id="outlined-basic" type="date" variant="outlined" placeholder="YY/MM/AAA" defaultValue={student.dateBirth} />
+              <TextField
+                type="date"
+                variant="outlined"
+                placeholder="YY/MM/AAA"
+                defaultValue={student.dateBirth}
+                onChange={(e) => setDateBirth(e.target.value)}
+              />
             </Stack>
           </Grid>
         </Grid>
@@ -79,7 +148,11 @@ const StudentForm = ({ student, isEdit }) => {
           </Grid>
           <Grid item xs={6} sm={4} md={6} lg={8}>
             <Stack spacing={2}>
-              <Select labelId="demo-simple-select-label" defaultValue={student.typeSubject} id="demo-simple-select" label="Type Document">
+              <FormLabel id="demo-simple-select-label">Type Subject</FormLabel>
+              <Select defaultValue={student.typeSubject} onChange={(e) => setTypeSubject(e.target.value)}>
+                <MenuItem value="">
+                  <em>None</em>
+                </MenuItem>
                 <MenuItem value="software_development">Software development</MenuItem>
                 <MenuItem value="machine_learning">Machine Learning</MenuItem>
                 <MenuItem value="mathematics">Mathematics ||</MenuItem>
@@ -91,8 +164,8 @@ const StudentForm = ({ student, isEdit }) => {
       <Stack>
         <Grid container spacing={2} direction="row-reverse">
           <Grid item>
-            <Button size="small" variant="contained">
-              Create
+            <Button size="small" variant="contained" onClick={handleSubmit}>
+              {isEdit ? 'Edit' : 'Create'}
             </Button>
           </Grid>
 
@@ -119,9 +192,9 @@ const Student = {
   phone: '',
   address: '',
   age: 0,
-  gender: 'male',
-  typeDocument: 'passport',
-  typeSubject: 'machine_learning',
+  gender: '',
+  typeDocument: '',
+  typeSubject: '',
   numberDocument: '',
   dateBirth: ''
 };

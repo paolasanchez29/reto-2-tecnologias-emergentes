@@ -1,20 +1,34 @@
 import { useState, useEffect } from 'react';
 import TeacherForm from './components/teacherForm';
+import { LinearProgress } from '@mui/material';
+import { useParams } from 'react-router-dom';
 
 const Edit = () => {
-  const teacher = {
-    name: 'John',
-    lastName: 'Doe',
-    email: 'johndoe@example.com',
-    phone: '1234567890',
-    address: '123 Main Street',
-    age: 20,
-    gender: 'male',
-    typeDocument: 'passport',
-    typeSubject: 'machine_learning',
-    numberDocument: '328d32099203',
-    dateBirth: '2023-05-18'
-  };
+  const { teacherId } = useParams();
+
+  const [teacher, setTeacher] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:9000/api/teachers/${teacherId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setTeacher(data);
+        } else {
+          throw new Error('Error getting the data');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [teacherId]);
+
+  if (!teacher) {
+    return <LinearProgress />;
+  }
 
   return <TeacherForm teacher={teacher} isEdit />;
 };

@@ -13,8 +13,30 @@ const TeacherActions = ({ teacherId }) => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const deleteTeacher = async () => {
+    // Cerrar modal
+    try {
+      const response = await fetch(`http://localhost:9000/api/teachers/${teacherId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const result = await response.json();
+      console.log('Success:', result);
+
+      // Refrescar la página
+      window.location.reload();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    handleClose();
   };
 
   return (
@@ -44,12 +66,12 @@ const TeacherActions = ({ teacherId }) => {
           }
         }}
       >
-        <MenuItem onClick={handleClose} disableRipple component={Link} to={'/teachers/edit/${teacherId}'}>
+        <MenuItem disableRipple component={Link} to={`/teachers/edit/${teacherId}`}>
           <EditOutlined style={{ marginRight: 10 }} />
           Edit
         </MenuItem>
 
-        <MenuItem onClick={handleClose} disableRipple>
+        <MenuItem onClick={deleteTeacher} disableRipple>
           <DeleteOutlined style={{ marginRight: 10 }} />
           Delete
         </MenuItem>
@@ -59,7 +81,7 @@ const TeacherActions = ({ teacherId }) => {
 };
 
 TeacherActions.propTypes = {
-  teacherId: PropTypes.number
+  teacherId: PropTypes.string
 };
 
 export default TeacherActions;
